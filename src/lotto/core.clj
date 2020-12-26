@@ -27,21 +27,43 @@
 
 (def all-lotto (json/read-str (slurp "lotto.json") :key-fn keyword))
 
+
 ;; json의 drwtNo를 가져오기 위한 구조를 반환
 (defn get-lotto-no-keywords []
   (map #(keyword (str "drwtNo" %)) (range 1 7)))
 
 ;; json 으로 되어 있는 값들을 [1 2 3 4 5 6]의 형태로 바꾸기
-(let [no (get-lotto-no-keywords)]
-  (reduce #(conj %1 (vals (select-keys %2 no))) [] all-lotto))
+(defn get-all-lotto []
+  (let [no (get-lotto-no-keywords)]
+    (reduce #(conj %1 (vals (select-keys %2 no))) [] all-lotto)))
 
 ;; hash-map에서 value가 제일 큰 값 가져오기
 (defn- get-big-number [coll]
   (reduce #(if (> (val (first %1)) (val (first %2))) %1 %2) (first coll) (rest coll)))
 
+;; 모든 자리수에서 제일 많이 나온 숫자 가져오기
+(->> (reduce #(into %1 %2) [] (get-all-lotto))
+     (sort)
+     (partition-by identity)
+     (map #(hash-map (first %) (count %)))
+     (into {})
+     (sort #(> (last %1) (last %2)))
+     (take 6)
+     (sort #(< (first %1) (first %2))))
+
+;; 모든 자리수에서 제일 적게 나온 숫자 가져오기
+(->> (reduce #(into %1 %2) [] (get-all-lotto))
+     (sort)
+     (partition-by identity)
+     (map #(hash-map (first %) (count %)))
+     (into {})
+     (sort #(< (last %1) (last %2)))
+     (take 6)
+     (sort #(< (first %1) (first %2))))
+
 ;; 큰 값을 가져오기
 (defn get-big-lotto [digit lotto-list]
-  (->> (map #((keyword (apply str ["drwtNo" digit])) %) lotto-list)
+  (->> (map #(nth % digit) lotto-list)
        (sort)
        (partition-by identity)
        (map #(hash-map (first %) (count %)))
@@ -49,8 +71,8 @@
 
 ;; 이 함수를 이용해서 어떻게 [1 2 3 4 5 6]의 형태를 
 ;; 만들 수 있는지 생각해보기
-(->> (for [i (range 1 7)]
-       (get-big-lotto i all-lotto))
+(->> (for [i (range 0 6)]
+       (get-big-lotto i (get-all-lotto)))
      (map #(key (first %))))
 
 

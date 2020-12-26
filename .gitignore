@@ -13,3 +13,4 @@ pom.xml.asc
 .calva
 .lsp
 /src/lotto/workspace.code-workspace
+.DS_Store
