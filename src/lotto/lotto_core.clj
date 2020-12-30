@@ -72,8 +72,9 @@
 ;; for를 하지 않고 수학적인 방법으로 자리수 마다 적게 나온 숫자를
 ;; 표시할 수는 없을까?
 ;; 중복을 제거하고 1의 자리에 대한 최소한의 값을 가져온다.
+;; remove에 대한 사용을 다시 확인
 (->> (map #(nth % 0) all-lotto)
-     (distinct))
-
+     (distinct)
+     (remove #(not= % (into #{} (range 1 (inc 45))))))
 
 
