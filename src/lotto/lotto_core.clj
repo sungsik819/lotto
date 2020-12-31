@@ -15,12 +15,13 @@
 ;; 파일에서 모든 로또 번호 읽어오기
 (def all-lotto-response (json/read-str (slurp "lotto.json") :key-fn keyword))
 
+(reduce #(conj %1 (keyword (str "drwtNo" %2))) (into '() [:drwNo :bnusNo]) (range 6 0 -1))
 
 ;; json의 drwtNo를 가져오기 위한 구조를 반환
 (defn- get-lotto-no-keywords []
-  (map #(keyword (str "drwtNo" %)) (range 1 7)))
+  (reduce #(conj %1 (keyword (str "drwtNo" %2))) (into '() [:drwNo :bnusNo]) (range 6 0 -1)))
 
-;; json 으로 되어 있는 값들을 [1 2 3 4 5 6]의 형태로 바꾸기
+;; json 으로 되어 있는 값들을 [1 2 3 4 5 6 보너스, 회차]의 형태로 바꾸기
 (def all-lotto
   (let [no (get-lotto-no-keywords)]
     (reduce #(conj %1 (vals (select-keys %2 no))) [] all-lotto-response)))
@@ -67,6 +68,9 @@
        (take 6)
        (sort #(< (first %1) (first %2)))))
 
+(defn- remain-numbers [coll]
+  (remove (into #{} coll) (range 1 (inc 45))))
+
 ;; 자리수에서 한번도 나오지 않은 숫자 가져오기
 ;; [(1 2 3 4 5 6) (1 2 3 4 5 6)]
 ;; for를 하지 않고 수학적인 방법으로 자리수 마다 적게 나온 숫자를
@@ -77,18 +81,19 @@
   (->> (map #(nth % (dec digit)) all-lotto)
        (distinct)
        (remain-numbers)
-       (remove #{45})))
+       (remove #{1 2 3 45})))
 
 ;; 자리수 마다 안나온 수 출력
 (for [i (range 1 7)] 
   (off-numbers i))
 
-(defn- remain-numbers [coll]
-  (remove (into #{} coll) (range 1 (inc 45))))
-
 ;; 첫째 자리 가장 큰 수
-(sort #(> (first %1) (first %2)) all-lotto)
+(take 1 (sort #(> (first %1) (first %2)) all-lotto))
 
 ;; 2째자리 가장 큰 수
-(sort #(> (second %1) (second %2)) all-lotto)
+(take 1 (sort #(> (second %1) (second %2)) all-lotto))
 
+;; 3째자리 가장 큰 수
+(take 1 (sort #(> (nth %1 2) (nth %2 2)) all-lotto))
+
+;; 자리수 마다 큰 수를 뽑아보기
