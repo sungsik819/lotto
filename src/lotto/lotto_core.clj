@@ -72,9 +72,23 @@
 ;; for를 하지 않고 수학적인 방법으로 자리수 마다 적게 나온 숫자를
 ;; 표시할 수는 없을까?
 ;; 중복을 제거하고 1의 자리에 대한 최소한의 값을 가져온다.
-;; remove에 대한 사용을 다시 확인
-(->> (map #(nth % 0) all-lotto)
-     (distinct)
-     (remove #(not= % (into #{} (range 1 (inc 45))))))
+;; 나온적 없는 번호를 자리수 별로 리스트로 표시
+(defn off-numbers [digit]
+  (->> (map #(nth % (dec digit)) all-lotto)
+       (distinct)
+       (remain-numbers)
+       (remove #{45})))
 
+;; 자리수 마다 안나온 수 출력
+(for [i (range 1 7)] 
+  (off-numbers i))
+
+(defn- remain-numbers [coll]
+  (remove (into #{} coll) (range 1 (inc 45))))
+
+;; 첫째 자리 가장 큰 수
+(sort #(> (first %1) (first %2)) all-lotto)
+
+;; 2째자리 가장 큰 수
+(sort #(> (second %1) (second %2)) all-lotto)
 
