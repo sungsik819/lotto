@@ -32,7 +32,8 @@
 
 ;; 큰 값을 가져오기
 (defn- get-big-lotto [digit lotto-list]
-  (->> (map #(nth % digit) lotto-list)
+  {:pre [(> digit 0) (< digit 7)]}
+  (->> (map #(nth % (dec digit)) lotto-list)
        (sort)
        (partition-by identity)
        (map #(hash-map (first %) (count %)))
@@ -42,7 +43,7 @@
 ;; 만들 수 있는지 생각해보기
 ;; 자리수 마다 큰 수를 반환하는 함수
 (defn get-big-lotto-digit []
-  (->> (for [i (range 0 6)]
+  (->> (for [i (range 1 7)]
          (get-big-lotto i all-lotto))
        (map #(key (first %)))))
 
@@ -78,6 +79,7 @@
 ;; 중복을 제거하고 1의 자리에 대한 최소한의 값을 가져온다.
 ;; 나온적 없는 번호를 자리수 별로 리스트로 표시
 (defn off-numbers [digit]
+  {:pre [(> digit 0) (< digit 7)]}
   (->> (map #(nth % (dec digit)) all-lotto)
        (distinct)
        (remain-numbers)
@@ -86,6 +88,17 @@
 ;; 자리수 마다 안나온 수 출력
 (for [i (range 1 7)] 
   (off-numbers i))
+
+;; 자리마다 제일 큰 수 출력
+;; digit은 1 ~ 6까지만 파라미터로 받을 수 있도록 검사
+;; :post도 있는데 그것은 결과 값에 대한 유효성 검사
+;; 필수적으로 :pre, :post는 []로 감싸야 연산을 수행한다.
+;; pre안에 check 함수로 변경 가능한지 확인 필요
+(defn big-number [digit]
+  {:pre [(> digit 0) (< digit 7)]}
+  (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto)))
+
+(big-number 1)
 
 ;; 첫째 자리 가장 큰 수
 (take 1 (sort #(> (first %1) (first %2)) all-lotto))
