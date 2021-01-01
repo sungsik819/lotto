@@ -1,6 +1,9 @@
 (ns lotto.lotto-core
   (:gen-class)
-  (:require [clojure.data.json :as json]))
+  (:require [clojure.data.json :as json]
+             [clojure.spec.alpha :as s]))
+
+(s/def ::lotto-digit (s/and #(> % 0) #(< % 7)))
 
 (defn get-lotto-json [no]
   (json/read-str
@@ -32,7 +35,7 @@
 
 ;; 큰 값을 가져오기
 (defn- get-big-lotto [digit lotto-list]
-  {:pre [(> digit 0) (< digit 7)]}
+  {:pre [(s/valid? ::lotto-digit digit)]}
   (->> (map #(nth % (dec digit)) lotto-list)
        (sort)
        (partition-by identity)
@@ -79,14 +82,14 @@
 ;; 중복을 제거하고 1의 자리에 대한 최소한의 값을 가져온다.
 ;; 나온적 없는 번호를 자리수 별로 리스트로 표시
 (defn off-numbers [digit]
-  {:pre [(> digit 0) (< digit 7)]}
+  {:pre [(s/valid? ::lotto-digit digit)]}
   (->> (map #(nth % (dec digit)) all-lotto)
        (distinct)
        (remain-numbers)
        (remove #{1 2 3 45})))
 
 ;; 자리수 마다 안나온 수 출력
-(for [i (range 1 7)] 
+(for [i (range 1 8)] 
   (off-numbers i))
 
 ;; 자리마다 제일 큰 수 출력
@@ -95,10 +98,10 @@
 ;; 필수적으로 :pre, :post는 []로 감싸야 연산을 수행한다.
 ;; pre안에 check 함수로 변경 가능한지 확인 필요
 (defn big-number [digit]
-  {:pre [(> digit 0) (< digit 7)]}
+  {:pre [(s/valid? ::lotto-digit digit)]}
   (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto)))
 
-(big-number 1)
+(big-number 6)
 
 ;; 첫째 자리 가장 큰 수
 (take 1 (sort #(> (first %1) (first %2)) all-lotto))
