@@ -5,13 +5,17 @@
 
 (s/def ::lotto-digit (s/and #(> % 0) #(< % 7)))
 
+(defn check-valid [digit]
+  (s/explain ::lotto-digit digit)
+  (s/valid? ::lotto-digit digit))
+
 (defn get-lotto-json [no]
   (json/read-str
    (slurp
     (str "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=" no))))
 
 (defn save-lotto []
-  (->> (for [i (range 1 944)] (get-lotto-json i))
+  (->> (for [i (range 1 945)] (get-lotto-json i))
        (into [])
        (spit "lotto.json")))
 
@@ -35,7 +39,7 @@
 
 ;; 큰 값을 가져오기
 (defn- get-big-lotto [digit lotto-list]
-  {:pre [(s/valid? ::lotto-digit digit)]}
+  {:pre [(check-valid digit)]}
   (->> (map #(nth % (dec digit)) lotto-list)
        (sort)
        (partition-by identity)
@@ -82,7 +86,7 @@
 ;; 중복을 제거하고 1의 자리에 대한 최소한의 값을 가져온다.
 ;; 나온적 없는 번호를 자리수 별로 리스트로 표시
 (defn off-numbers [digit]
-  {:pre [(s/valid? ::lotto-digit digit)]}
+  {:pre [(check-valid digit)]}
   (->> (map #(nth % (dec digit)) all-lotto)
        (distinct)
        (remain-numbers)
@@ -98,7 +102,7 @@
 ;; 필수적으로 :pre, :post는 []로 감싸야 연산을 수행한다.
 ;; pre안에 check 함수로 변경 가능한지 확인 필요
 (defn big-number [digit]
-  {:pre [(s/valid? ::lotto-digit digit)]}
+  {:pre [(check-valid digit)]}
   (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto)))
 
 (big-number 6)
@@ -113,3 +117,19 @@
 (take 1 (sort #(> (nth %1 2) (nth %2 2)) all-lotto))
 
 ;; 자리수 마다 큰 수를 뽑아보기
+
+;; 로또 번호만 저장, 보너스, 회차 제외
+(def lotto-numbers (map #(take 6 %) all-lotto))
+
+;; 전체 회차에서 같은 번호가 없으면 그 번호만 출력 한다.
+(defn equal-numbers [numbers]
+  (some #(if (= numbers %) numbers) lotto-numbers))
+
+;; 중복으로 나온 숫자가 있는지 체크
+(->> (repeatedly #(rand-int 45))
+     (take 10)
+     (filter #(> % 0))
+     (into #{})
+     (take 6)
+     (sort)
+     (equal-numbers))
