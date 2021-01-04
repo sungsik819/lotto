@@ -93,8 +93,11 @@
        (remove #{1 2 3 45})))
 
 ;; 자리수 마다 안나온 수 출력
-(for [i (range 1 8)] 
-  (off-numbers i))
+(reduce #(conj %1 (off-numbers %2)) [] (range 1 7))
+
+;; 로또 자리수 값 출력
+(defn get-digit-value [digit numbers]
+  (nth numbers (dec digit)))
 
 ;; 자리마다 제일 큰 수 출력
 ;; digit은 1 ~ 6까지만 파라미터로 받을 수 있도록 검사
@@ -103,20 +106,22 @@
 ;; pre안에 check 함수로 변경 가능한지 확인 필요
 (defn big-number [digit]
   {:pre [(check-valid digit)]}
-  (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto)))
+  (->> (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
+       (apply concat)
+       (get-digit-value digit)))
 
-(big-number 6)
+;; 작은 수 출력
+(defn small-number [digit]
+  {:pre [(check-valid digit)]}
+  (->> (take 1 (sort #(< (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
+       (apply concat)
+       (get-digit-value digit)))
 
-;; 첫째 자리 가장 큰 수
-(take 1 (sort #(> (first %1) (first %2)) all-lotto))
+;; 로또 자리수마다 큰 수 출력
+(reduce #(conj %1 (big-number %2)) [] (range 1 7))
 
-;; 2째자리 가장 큰 수
-(take 1 (sort #(> (second %1) (second %2)) all-lotto))
-
-;; 3째자리 가장 큰 수
-(take 1 (sort #(> (nth %1 2) (nth %2 2)) all-lotto))
-
-;; 자리수 마다 큰 수를 뽑아보기
+;; 로또 자리수마다 작은 수 출력
+(reduce #(conj %1 (small-number %2)) [] (range 1 7))
 
 ;; 로또 번호만 저장, 보너스, 회차 제외
 (def lotto-numbers (map #(take 6 %) all-lotto))
