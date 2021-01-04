@@ -121,9 +121,10 @@
 ;; 로또 번호만 저장, 보너스, 회차 제외
 (def lotto-numbers (map #(take 6 %) all-lotto))
 
-;; 전체 회차에서 같은 번호가 없으면 그 번호만 출력 한다.
-(defn equal-numbers [numbers]
-  (some #(if (= numbers %) numbers) lotto-numbers))
+;; 전체 회차에서 같은 번호가 있는지 출력 한다.
+;; 같은 번호가 있으면 true, 없으면 nil이다.
+(defn check-equal-numbers [numbers]
+  [(some #(= numbers %) lotto-numbers) numbers])
 
 ;; 중복으로 나온 숫자가 있는지 체크
 (->> (repeatedly #(rand-int 45))
@@ -132,4 +133,4 @@
      (into #{})
      (take 6)
      (sort)
-     (equal-numbers))
+     (check-equal-numbers))
