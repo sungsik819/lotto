@@ -99,22 +99,29 @@
 (defn get-digit-value [digit numbers]
   (nth numbers (dec digit)))
 
-;; 자리마다 제일 큰 수 출력
+;; 자리수에서 제일 큰 로또 번호 
+(defn- get-big-lotto-numbers [digit]
+  (->> (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
+       (apply concat)))
+
+;; 자리수에서 제일 작은 로또 번호 
+(defn- get-small-lotto-numbers [digit]
+  (->> (take 1 (sort #(< (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
+       (apply concat)))
+
+;; 자리에서 제일 큰 수 출력
 ;; digit은 1 ~ 6까지만 파라미터로 받을 수 있도록 검사
 ;; :post도 있는데 그것은 결과 값에 대한 유효성 검사
 ;; 필수적으로 :pre, :post는 []로 감싸야 연산을 수행한다.
-;; pre안에 check 함수로 변경 가능한지 확인 필요
 (defn big-number [digit]
-  {:pre [(check-valid digit)]}
-  (->> (take 1 (sort #(> (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
-       (apply concat)
+  {:pre [(> digit 0) (< digit 7)]}
+  (->> (get-big-lotto-numbers digit)
        (get-digit-value digit)))
 
-;; 작은 수 출력
+;; 자리에서 작은 수 출력
 (defn small-number [digit]
-  {:pre [(check-valid digit)]}
-  (->> (take 1 (sort #(< (nth %1 (dec digit)) (nth %2 (dec digit))) all-lotto))
-       (apply concat)
+  {:pre [(> digit 0) #(< digit 7)]}
+  (->> (get-small-lotto-numbers digit)
        (get-digit-value digit)))
 
 ;; 로또 자리수마다 큰 수 출력
