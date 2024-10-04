@@ -1,6 +1,9 @@
 (ns lotto.main
   (:require [lotto.core :as lotto]))
 
+;; 신규 마지막 회차 저장 하기
+(lotto/add-last-round)
+
 ;; 전체 자리수에 있는 숫자의 횟수 계산
 (def all-number-counts (lotto/group-by-number (mapcat identity lotto/lotto-data)))
 

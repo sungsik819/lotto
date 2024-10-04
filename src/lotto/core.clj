@@ -6,9 +6,6 @@
 ;; 데이터 가공 하기
 ;; 가공된 데이터를 처리 하기
 
-;; 2024.10.04일 기준 회차
-(def last-round 1139)
-
 (defn get-data [round]
   (let [data (json/read-str
               (slurp
@@ -22,13 +19,12 @@
 (def last-drwNo #(:drwNo (last %)))
 
 ;; 마지막 회차 저장 하기
-(defn add-last-round [last-round]
-  (let [last-data (get-data last-round)
-        data (read-string (slurp "lotto.edn"))]
-    (if (not= (last-drwNo data) last-round)
-      (->> (conj data last-data)
-           (spit "lotto.edn"))
-      (println last-round "회차는 이미 저장되어 있습니다."))))
+(defn add-last-round []
+  (let [data (read-string (slurp "lotto.edn"))
+        round (inc (last-drwNo data))
+        last-data (get-data round)]
+    (->> (conj data last-data)
+         (spit "lotto.edn"))))
 
 ;; 원격에서 전체 회차 데이터 가져오기
 ;; (def remote-data (map #(get-data %) (range 1 (inc last-round))))
@@ -94,7 +90,7 @@
 
   (spit "lotto2.edn" [(get-data 1138)])
 
-  (add-last-round last-round))
+  (add-last-round))
 
 ;; 위 함수를 만들기 위한 테스트
 (comment
