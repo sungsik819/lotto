@@ -30,15 +30,32 @@
 ;; (def remote-data (map #(get-data %) (range 1 (inc last-round))))
 
 ;; 파일에 있는 정보 읽기
-(def file-data (read-string (slurp "lotto.edn")))
+(def ^:private file-data (read-string (slurp "lotto.edn")))
+
+;; 회차 데이터 가져오기
+(def ^:private get-round #(nth file-data (dec %)))
+
+;; 범위에 있는 데이터 가져오기
+(defn ^:private get-rounds [start end]
+  (map get-round (range start (inc end))))
 
 ;; [1 2 3 4 5 6 보너스]의 형태로 변환
 (defn trans-data [& coll]
   (let [{:keys [drwtNo1 drwtNo2 drwtNo3 drwtNo4 drwtNo5 drwtNo6 bnusNo]} coll]
     [drwtNo1 drwtNo2 drwtNo3 drwtNo4 drwtNo5 drwtNo6 bnusNo]))
 
-;; 변환된 데이터
-(def lotto-data (map #(trans-data %) file-data))
+;; 로또 데이터로 변환
+(defn lotto-data
+  ([]
+   (lotto-data file-data))
+  ([file-data]
+   (map trans-data file-data)))
+
+;; 범위에 있는 로또 데이터 가져오기
+(defn get-ranges [start end]
+  (->> (get-rounds start end)
+       (lotto-data)))
+
 
 ;; 위 데이터를 바탕으로 적게 나온 숫자 가져오기
 ;; [숫자 횟수] 형태로 바꾼다.
@@ -80,8 +97,11 @@
      :unincluded (unincluded-numbers digit-data)}))
 
 ;; 자리에 대한 각각 통계 데이터
-(defn statistics []
-  (map #(digit-statistics % lotto-data) [first-d second-d third-d forth-d fifth-d sixth-d bonus-d]))
+(defn statistics
+  ([]
+   (statistics lotto-data))
+  ([lotto-data]
+   (map #(digit-statistics % lotto-data) [first-d second-d third-d forth-d fifth-d sixth-d bonus-d])))
 
 
 ;; 테스트 용
@@ -95,7 +115,7 @@
 ;; 위 함수를 만들기 위한 테스트
 (comment
   ;; 첫째 자리수 가져오기
-  (def first-digit (map first lotto-data))
+  (def first-digit (map first (lotto-data)))
 ;; [숫자 횟수] 형태로 변환
   (def first-number-counts (group-by-number first-digit))
 
@@ -103,37 +123,37 @@
   (unincluded-numbers first-digit)
 
 ;; 둘째 자리수 가져오기
-  (def second-digit (map second lotto-data))
+  (def second-digit (map second (lotto-data)))
 
 ;; 둘째 자리에서 안나온 숫자 확인
   (unincluded-numbers second-digit)
 
 ;; 셋째 자리수 가져오기
-  (def third-digit (map third-d lotto-data))
+  (def third-digit (map third-d (lotto-data)))
 
 ;; 셋째 자리에서 안나온 숫자 확인
   (unincluded-numbers third-digit)
 
 ;; 넷째 자리수 가져오기
-  (def forth-digit (map forth-d lotto-data))
+  (def forth-digit (map forth-d (lotto-data)))
 
 ;; 넷째 자리에서 안나온 숫자 확인
   (unincluded-numbers forth-digit)
 
 ;; 다섯째 자리수 가져오기
-  (def fifth-digit (map fifth-d lotto-data))
+  (def fifth-digit (map fifth-d (lotto-data)))
 
 ;; 다섯째 자리에서 안나온 숫자 확인
   (unincluded-numbers fifth-digit)
 
 ;; 여섯째 자리수 가져오기
-  (def sixth-digit (map sixth-d lotto-data))
+  (def sixth-digit (map sixth-d (lotto-data)))
 
 ;; 여섯째 자리에서 안나온 숫자 확인
   (unincluded-numbers sixth-digit)
 
 ;; 보너스 숫자만 가져오기
-  (def bonus-digit (map bonus-d lotto-data))
+  (def bonus-digit (map bonus-d (lotto-data)))
 
 ;; 보너스 자리에서 안나온 숫자 확인 - 없음
   (unincluded-numbers bonus-digit))
