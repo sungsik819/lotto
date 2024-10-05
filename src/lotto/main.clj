@@ -29,5 +29,11 @@
 (lotto/statistics)
 
 ;; 1 ~ 100까지 회차에서의 통계 보기
-(->> (lotto/get-ranges 1 100)
+(->> (lotto/lotto-data 1 100)
      (lotto/statistics))
+
+;; 전체 색 데이터가 나타난 횟수 확인
+(lotto/group-by-number (mapcat identity (lotto/lotto-colors)))
+
+;; 1~100회차에 대해 색이 나타난 횟수 확인
+(lotto/group-by-number (mapcat identity (lotto/lotto-colors 1 100)))

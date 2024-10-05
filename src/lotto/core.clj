@@ -6,6 +6,13 @@
 ;; 데이터 가공 하기
 ;; 가공된 데이터를 처리 하기
 
+;; 색 정의
+;; 1 ~ 10 : yellow
+;; 11 ~ 20 : blue
+;; 21 ~ 30 : red
+;; 31 ~ 40 : gray
+;; 41 ~ 45 : green
+
 (defn get-data [round]
   (let [data (json/read-str
               (slurp
@@ -49,12 +56,23 @@
   ([]
    (lotto-data file-data))
   ([file-data]
-   (map trans-data file-data)))
+   (map trans-data file-data))
+  ([start end] ;; 범위에 있는 회차 가져오기
+   (->> (get-rounds start end)
+        (lotto-data))))
 
-;; 범위에 있는 로또 데이터 가져오기
-(defn get-ranges [start end]
-  (->> (get-rounds start end)
-       (lotto-data)))
+;; 범위의 숫자에 해당하는 값 리턴
+;; 교체하는 로직만 있으면 될 것 같아서 데이터 구조는 없음
+(defn get-color [n]
+  (cond
+    (contains? (set (range 1 11)) n) :yellow
+    (contains? (set (range 11 21)) n) :blue
+    (contains? (set (range 21 31)) n) :red
+    (contains? (set (range 31 41)) n) :gray
+    :else :green))
+
+;; 한줄을 색깔명으로 교체
+(map get-color [2 10 12 15 22 44 1])
 
 
 ;; 위 데이터를 바탕으로 적게 나온 숫자 가져오기
@@ -103,14 +121,12 @@
   ([lotto-data]
    (map #(digit-statistics % lotto-data) [first-d second-d third-d forth-d fifth-d sixth-d bonus-d])))
 
-
-;; 테스트 용
-(comment
-  (get-data 1140)
-
-  (spit "lotto2.edn" [(get-data 1138)])
-
-  (add-last-round))
+;; 숫자를 색으로 교체
+(defn lotto-colors
+  ([]
+   (map #(map get-color %) (lotto-data)))
+  ([start end]
+   (map #(map get-color %) (lotto-data start end))))
 
 ;; 위 함수를 만들기 위한 테스트
 (comment
