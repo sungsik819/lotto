@@ -5,7 +5,7 @@
 (lotto/add-last-round)
 
 ;; 전체 자리수에 있는 숫자의 횟수 계산
-(def all-number-counts (lotto/group-by-number (mapcat identity (lotto/lotto-data))))
+(def all-number-counts (lotto/group-by-number (flatten (lotto/lotto-data))))
 
 ;; 숫자가 적게 나온 번호 순으로
 (def min-numbers (lotto/sort-asc all-number-counts))
@@ -33,7 +33,7 @@
      (lotto/statistics))
 
 ;; 전체 색 데이터가 나타난 횟수 확인
-(lotto/group-by-number (mapcat identity (lotto/lotto-colors)))
+(lotto/group-by-number (flatten (lotto/lotto-colors)))
 
 ;; 1~100회차에 대해 색이 나타난 횟수 확인
-(lotto/group-by-number (mapcat identity (lotto/lotto-colors 1 100)))
+(lotto/group-by-number (flatten (lotto/lotto-colors 1 100)))
