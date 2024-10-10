@@ -37,7 +37,7 @@
 ;; (def remote-data (map #(get-data %) (range 1 (inc last-round))))
 
 ;; 파일에 있는 정보 읽기
-(def ^:private file-data (read-string (slurp "lotto.edn")))
+(def file-data (read-string (slurp "lotto.edn")))
 
 ;; 회차 데이터 가져오기
 (def ^:private get-round #(nth file-data (dec %)))
@@ -127,6 +127,11 @@
    (map #(map get-color %) (lotto-data)))
   ([start end]
    (map #(map get-color %) (lotto-data start end))))
+
+;; 자리에 해당하는 [숫자 횟수] 형태의 데이터 가져오기
+(defn get-digit-count [df]
+  (let [d (map df (lotto-data))]
+    (group-by-number d)))
 
 ;; 위 함수를 만들기 위한 테스트
 (comment
